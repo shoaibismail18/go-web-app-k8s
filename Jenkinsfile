@@ -50,26 +50,45 @@ pipeline {
 
         // OWASP Dependency Check
         stage('OWASP Dependency Check') {
-    steps {
-        sh """
-            echo "Running OWASP Dependency Check (CLI)"
-
-            if ! command -v unzip &> /dev/null; then
-                echo "unzip not installed, installing..."
-                sudo apt-get update && sudo apt-get install -y unzip
-            fi
-
-
-            # Run scan with exit code for Critical/High vulnerabilities
-            ./dependency-check/dependency-check/bin/dependency-check.sh \
-                --project "go-web-app" \
-                --scan . \
-                --failOnCVSS 7 \
-                --format "ALL" \
-                --disableAssembly
-
-        """
-    }
+            steps {
+                sh """
+                    echo "Running OWASP Dependency Check using Docker"
+                    
+                    # Create reports directory
+                    mkdir -p ./dependency-check-report
+                    
+                    # Run OWASP Dependency Check in Docker container
+                    docker run --rm \\
+                        -v \$(pwd):/src:ro \\
+                        -v \$(pwd)/dependency-check-report:/report:rw \\
+                        owasp/dependency-check:latest \\
+                        --scan /src \\
+                        --format "ALL" \\
+                        --project "go-web-app" \\
+                        --failOnCVSS 7 \\
+                        --disableAssembly \\
+                        --out /report
+                """
+            }
+            post {
+                always {
+                    // Archive the reports
+                    archiveArtifacts artifacts: 'dependency-check-report/*', allowEmptyArchive: true
+                    
+                    // Publish the HTML report
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'dependency-check-report',
+                        reportFiles: 'dependency-check-report.html',
+                        reportName: 'OWASP Dependency Check Report',
+                        reportTitles: ''
+                    ])
+                }
+            }
+}
+    
 }
 
 
