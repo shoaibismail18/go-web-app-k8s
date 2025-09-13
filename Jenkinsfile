@@ -71,7 +71,13 @@ pipeline {
                         git config --global user.name "shoaibismail18"
                         echo "Updating manifests files in Helm folder"
                         sed -i "s|tag: .*|tag: \\"${IMAGE_TAG}\\"|" helm/go-web-app-chart/values.yaml
-                        git add helm/go-web-app-chart/values.yaml
+                         # Update all Kubernetes manifests in K8s/Manifests
+
+                        for file in K8s/Manifests/*.yaml; do
+                        sed -i "s|image: shoaibismail18/go-web-app:.*|image: shoaibismail18/go-web-app:${IMAGE_TAG}|" "$file"
+                        done
+
+                        git add helm/go-web-app-chart/values.yaml K8s/Manifests/*.yaml
                         git commit -m "Updating image tag to ${IMAGE_TAG}" || echo "No changes to commit"
                         git push https://x-access-token:${GITHUB_TOKEN}@github.com/shoaibismail18/go-web-app-k8s.git HEAD:main
                     """
