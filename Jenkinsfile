@@ -50,7 +50,6 @@ pipeline {
 
         // Docker build and push
         stage('Docker Build and Push') {
-            when { branch 'main' }
             steps {
                 withCredentials([string(credentialsId: 'docker-hub-token', variable: 'DOCKERHUB_TOKEN')]) {
                     script {
@@ -72,7 +71,6 @@ pipeline {
 
         // Update Helm chart and Kubernetes manifests
         stage('Update Helm Chart and K8s Manifests') {
-            when { branch 'main' }
             steps {
                 withCredentials([string(credentialsId: 'GitHub_credentials', variable: 'GITHUB_TOKEN')]) {
                     sh """
