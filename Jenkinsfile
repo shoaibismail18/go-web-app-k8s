@@ -48,7 +48,7 @@ pipeline {
             }
         }
 
-        // OWASP Dependency Check
+        // OWASP Dependency Check using Docker
         stage('OWASP Dependency Check') {
             steps {
                 sh """
@@ -70,27 +70,7 @@ pipeline {
                         --out /report
                 """
             }
-            post {
-                always {
-                    // Archive the reports
-                    archiveArtifacts artifacts: 'dependency-check-report/*', allowEmptyArchive: true
-                    
-                    // Publish the HTML report
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'dependency-check-report',
-                        reportFiles: 'dependency-check-report.html',
-                        reportName: 'OWASP Dependency Check Report',
-                        reportTitles: ''
-                    ])
-                }
-            }
-}
-    
-}
-
+        }
 
         // Docker build and push
         stage('Docker Build and Push') {
@@ -136,6 +116,7 @@ pipeline {
                 }
             }
         }
+
     }
 
     post {
