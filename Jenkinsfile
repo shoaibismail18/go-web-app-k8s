@@ -54,11 +54,12 @@ pipeline {
         sh """
             echo "Running OWASP Dependency Check (CLI)"
 
-            # Download Dependency-Check CLI if not present
+            # Download and extract tar.gz instead of zip
             if [ ! -d dependency-check ]; then
-                curl -L -o dependency-check.zip https://github.com/jeremylong/DependencyCheck/releases/download/v8.3.2/dependency-check-8.3.2-release.zip
-                unzip dependency-check.zip -d dependency-check
+                curl -L -o dependency-check.tar.gz https://github.com/jeremylong/DependencyCheck/releases/download/v8.3.2/dependency-check-8.3.2-release.tar.gz
+                tar -xzf dependency-check.tar.gz
             fi
+
 
             # Run scan with exit code for Critical/High vulnerabilities
             ./dependency-check/dependency-check/bin/dependency-check.sh \
