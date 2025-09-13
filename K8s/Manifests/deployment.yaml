@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: go-web-app
-        image: shoaibismail18/go-web-app:v1
+        image: shoaibismail18/go-web-app:16
         ports:
         - containerPort: 8080
