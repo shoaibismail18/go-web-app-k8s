@@ -33,15 +33,16 @@ pipeline {
         }
 
         stage('Code Quality') {
-    steps {
-        sh """
-            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh \
-              | sh -s -- -b \$HOME/bin v1.56.2
-            export PATH=\$HOME/bin:\$PATH
-            golangci-lint run --timeout=10m
-        """
-    }
-}
+            steps {
+                sh """
+                    echo "Installing golangci-lint"
+                    go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+                    export PATH=\$(go env GOPATH)/bin:\$PATH
+                    golangci-lint version
+                    golangci-lint run --timeout=10m
+                """
+            }
+        }
 
         stage('Docker build and push') {
             when { branch 'main' }
