@@ -54,10 +54,9 @@ pipeline {
         sh """
             echo "Running OWASP Dependency Check (CLI)"
 
-            # Download and extract tar.gz instead of zip
-            if [ ! -d dependency-check ]; then
-                curl -L -o dependency-check.tar.gz https://github.com/jeremylong/DependencyCheck/releases/download/v8.3.2/dependency-check-8.3.2-release.tar.gz
-                tar -xzf dependency-check.tar.gz
+            if ! command -v unzip &> /dev/null; then
+                echo "unzip not installed, installing..."
+                sudo apt-get update && sudo apt-get install -y unzip
             fi
 
 
