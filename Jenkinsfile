@@ -48,30 +48,6 @@ pipeline {
             }
         }
 
-        // OWASP Dependency Check using Docker
-        stage('OWASP Dependency Check') {
-            steps {
-                sh """
-                    echo "Running OWASP Dependency Check using Docker"
-                    
-                    # Create reports directory
-                    mkdir -p ./dependency-check-report
-                    
-                    # Run OWASP Dependency Check in Docker container
-                    docker run --rm \\
-                        -v \$(pwd):/src:ro \\
-                        -v \$(pwd)/dependency-check-report:/report:rw \\
-                        owasp/dependency-check:latest \\
-                        --scan /src \\
-                        --format "ALL" \\
-                        --project "go-web-app" \\
-                        --failOnCVSS 7 \\
-                        --disableAssembly \\
-                        --out /report
-                """
-            }
-        }
-
         // Docker build and push
         stage('Docker Build and Push') {
             steps {
@@ -90,6 +66,19 @@ pipeline {
                         echo "IMAGE_TAG is set to ${env.IMAGE_TAG}"
                     }
                 }
+            }
+        }
+
+        // Trivy image scan
+        stage('Trivy Image Scan') {
+            steps {
+                sh """
+                    echo "Scanning Docker image with Trivy"
+                    docker run --rm aquasec/trivy:latest image \
+                        --severity CRITICAL,HIGH \
+                        --exit-code 0 \
+                        shoaibismail18/go-web-app:${IMAGE_TAG}
+                """
             }
         }
 
